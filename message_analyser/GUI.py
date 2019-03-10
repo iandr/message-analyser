@@ -119,16 +119,22 @@ class MessageAnalyserGUI(tk.Frame):
         telegram_check_button = tk.Checkbutton(check_boxes_frame, text="Messages from Telegram", variable=from_telegram,
                                                font=self.default_font)
         telegram_check_button.pack(anchor=tk.W)
+        if "from_telegram" in self.session_params and self.session_params["from_telegram"]:
+            telegram_check_button.select()
 
         from_vk = tk.BooleanVar()
         vk_check_button = tk.Checkbutton(check_boxes_frame, text="Messages from vkOpt text file", variable=from_vk,
                                          font=self.default_font)
         vk_check_button.pack(anchor=tk.W)
+        if "from_vk" in self.session_params and self.session_params["from_vk"]:
+            vk_check_button.select()
 
         plot_words = tk.BooleanVar()
         words_check_button = tk.Checkbutton(check_boxes_frame, text="Add file with words", variable=plot_words,
                                             font=self.default_font)
         words_check_button.pack(anchor=tk.W)
+        if "plot_words" in self.session_params and self.session_params["plot_words"]:
+            words_check_button.select()
 
         def set_data_and_continue():
             if from_vk.get() or from_telegram.get():
@@ -240,11 +246,20 @@ class MessageAnalyserGUI(tk.Frame):
                 return self.raise_telegram_auth_frame()
             self.raise_finish_frame()
 
+        def raise_start_frame():
+            bottom_frame.destroy()
+            table_frame.destroy()
+            self.raise_start_frame()
+
         bottom_frame = tk.Frame()
         bottom_frame.pack(side=tk.BOTTOM)
+        back_button = tk.Button(bottom_frame, text="Back", command=raise_start_frame,
+                                    padx=35, background=self.button_background, font=self.default_font)
+        back_button.pack(side=tk.LEFT)
         continue_button = tk.Button(bottom_frame, text="Continue", command=set_data_and_continue,
                                     padx=35, background=self.button_background, font=self.default_font)
-        continue_button.pack(side=tk.BOTTOM)
+        
+        continue_button.pack(side=tk.RIGHT)
         self.parent.bind('<Return>', lambda _: set_data_and_continue())
 
     def raise_telegram_auth_frame(self):
@@ -255,9 +270,7 @@ class MessageAnalyserGUI(tk.Frame):
         assert self.session_params["from_telegram"]
 
         api_id, api_hash, phone_number, _ = storage.get_telegram_secrets()
-        
-        # A text in labels should be 15 characters long in order to not shift entries. 
-        # Should make them more adaptive some day.
+
         api_id_label = tk.Label(table_frame, text="API id :       ", height=2, font=self.default_font)
         api_id_label.grid(row=1, column=1, sticky=tk.W)
 
@@ -285,7 +298,7 @@ class MessageAnalyserGUI(tk.Frame):
         code_dir = tk.Entry(table_frame, width=46, font=self.default_font)
         code_dir.grid(row=4, column=2, sticky=tk.W)
 
-        password_label = tk.Label(table_frame, text="Password :     ", height=2, font=self.default_font)
+        password_label = tk.Label(table_frame, text="Password :         ", height=2, font=self.default_font)
         password_label.grid(row=5, column=1, sticky=tk.W)
 
         password_dir = tk.Entry(table_frame, width=46, font=self.default_font)
